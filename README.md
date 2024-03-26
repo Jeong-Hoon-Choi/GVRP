@@ -34,9 +34,9 @@ python3 GVRP.py -i your_input_vcf_path.vcf -o your_output_vcf_path.vcf -d your_d
 
 Example VCF files can be accessed through Google Drive:
 
-- **Human VCF Example**: The files are available at [this link](https://drive.google.com/drive/folders/1CddCgFMFvMPaHo6t_eZ5k2TbM_S29Zhi?usp=sharing). These include VCF files for GIAB's HG001 and HG002 with 60x coverage genome sequences, preprocessed to exclude non-human-like sequences and then called with DeepVariant, organized by variant type.
+- **Human VCF Example**: The files are available at [this link](https://drive.google.com/drive/folders/1CddCgFMFvMPaHo6t_eZ5k2TbM_S29Zhi?usp=sharing). These include VCF files for GIAB's HG001 and HG002 with 60x coverage genome sequences, preprocessed as non-human species genome sequence, which skipped local realignment and base recalibration.  Then call variants with DeepVariant, and seperated in variant types.
 
-- **Rhesus Macaque VCF Example**: The data for two individuals of Rhesus macaque can be found at [this link](https://drive.google.com/drive/folders/1CddCgFMFvMPaHo6t_eZ5k2TbM_S29Zhi?usp=sharing). These are VCF files processed similarly.
+- **Rhesus Macaque VCF Example**: The VCF file for two individuals of Rhesus macaque can be found at [this link](https://drive.google.com/drive/folders/1CddCgFMFvMPaHo6t_eZ5k2TbM_S29Zhi?usp=sharing). These VCF files contain genome variant called by DeepVariant respectively.
 
 ## Acknowledgments
 
