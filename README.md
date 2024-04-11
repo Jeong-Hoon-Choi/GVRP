@@ -1,6 +1,6 @@
-# Genome Variant Refinement Processor (GVRP)
+# Genome Variant Refinement Pipeline (GVRP)
 
-The Genome Variant Refinement Processor (GVRP) is a Python-based tool developed to refine Variant Call Format (VCF) files produced by DeepVariant. It allows for the processing of VCF files by offering functionalities to input, output, and optionally delete variants from the VCF files.
+The Genome Variant Refinement Pipeline (GVRP) is a Python-based tool developed to refine Variant Call Format (VCF) files produced by DeepVariant. It allows for the processing of VCF files by offering functionalities to input, output, and optionally delete variants from the VCF files.
 
 ## Requirements
 
@@ -40,4 +40,4 @@ Example VCF files can be accessed through Google Drive:
 
 ## Acknowledgments
 
-This work was supported by Institute of Information & Communications Technology Planning & Evaluation (IITP) under the Artificial Intelligence Convergence Innovation Human Resources Development (IITP-2023-00254177) and the National Research Foundation of Korea (NRF) grant funded by the Korean government (MSIT) (No. 2021R1A2C2010775) and  (No. 2022R1A4A1030189).
+This work was supported by the National Research Foundation of Korea (NRF) grant funded by the Korean government (MSIT) (No. 2021R1A2C2010775) and the Institute of Information & Communications Technology Planning & Evaluation (IITP) under the Artificial Intelligence Convergence Innovation Human Resources Development (IITP-2023-00254177)
