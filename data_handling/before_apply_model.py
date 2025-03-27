@@ -57,6 +57,89 @@ def labeling_df(vcf_df, column_name):
     return vcf_df
 
 
+def extract_alignment_info(bam, chrom, pos):
+    cigar_features = []
+    mapq_values = []
+    strand_counts = {"forward": 0, "reverse": 0}  # Strand count 초기화
+
+    for read in bam.fetch(str(chrom), int(pos) - 1, int(pos)):  # 0-based 좌표
+        # Strand 정보 계산
+        if read.flag & 16:  # Reverse strand
+            strand_counts["reverse"] += 1
+        else:  # Forward strand
+            strand_counts["forward"] += 1
+
+        # CIGAR 분석
+        cigar_string = read.cigarstring
+        if cigar_string is None:
+            continue
+
+        # Count CIGAR operations
+        operations = re.findall(r'(\d+)([MIDNSHP=X])', cigar_string)
+        feature = {"M": 0, "S": 0, "I": 0, "D": 0}
+        for length, op in operations:
+            if op in feature:
+                feature[op] += int(length)
+
+        feature["Total_length"] = sum(feature.values())  # 리드 총 길이
+        feature["M_ratio"] = feature["M"] / feature["Total_length"] if feature["Total_length"] > 0 else 0
+        feature["S_ratio"] = feature["S"] / feature["Total_length"] if feature["Total_length"] > 0 else 0
+        feature["CIGAR"] = cigar_string
+
+        # MAPQ
+        mapq_values.append(read.mapping_quality)
+
+        # Merge features
+        cigar_features.append(feature)
+
+    # 평균 CIGAR feature 계산
+    avg_cigar = {
+        "M_ratio": np.mean([feat["M_ratio"] for feat in cigar_features]) if cigar_features else None,
+        "S_ratio": np.mean([feat["S_ratio"] for feat in cigar_features]) if cigar_features else None,
+        "Total_reads": len(cigar_features),
+    }
+
+    # MAPQ 통계 계산
+    mapq_stats = {
+        "mean_mapq": np.mean(mapq_values) if mapq_values else None,
+        "low_mapq_ratio": sum(1 for mq in mapq_values if mq < 20) / len(mapq_values) if mapq_values else None,
+    }
+
+    # Strand 비율 계산
+    total_strands = strand_counts["forward"] + strand_counts["reverse"]
+    strand_ratios = {
+        "forward_strand_ratio": strand_counts["forward"] / total_strands if total_strands > 0 else 0,
+        "reverse_strand_ratio": strand_counts["reverse"] / total_strands if total_strands > 0 else 0,
+    }
+
+    return {**avg_cigar, **mapq_stats, **strand_ratios}
+
+
+def get_alignment_information(seq_dir, labeled_df):
+    align_info_results = []
+    chroms = labeled_df['CHROM'].values
+    positions = labeled_df['POS'].values
+
+    with pysam.AlignmentFile(seq_dir, "rb") as bam:
+        for i in tqdm(range(len(labeled_df.index))):
+            chrom = chroms[i]
+            pos = positions[i]
+            align_info = extract_alignment_info(bam, chrom, pos)
+            align_info_results.append({"CHROM": chrom, "POS": pos, **align_info})
+
+    # align_info_results를 DataFrame으로 변환
+    align_info_df = pd.DataFrame(align_info_results)
+
+    # labeled_df와 병합
+    align_df = labeled_df.merge(align_info_df, on=["CHROM", "POS"], how="left")
+    align_df.fillna({
+        "M_ratio": 0, "S_ratio": 0, "Total_reads": 0,
+        "mean_mapq": 0, "low_mapq_ratio": 0,
+        "forward_strand_ratio": 0, "reverse_strand_ratio": 0
+    }, inplace=True)
+    return align_df
+
+
 def make_learning_data(data_csv, column_name):
     feature_column = []
     feature_column_dict = {}

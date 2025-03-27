@@ -10,11 +10,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='input output directory')
 
     # 1. first set parameters
-    parser.add_argument('--input', '-i', type=str, required=True, help='input vcf file path')
+    parser.add_argument('--vcf_input', '-vcf_i', type=str, required=True, help='input vcf file path')
+    parser.add_argument('--sa_input', '-sa_i', type=str, required=True, help='input sequence alignment path')
     parser.add_argument('--output', '-o', type=str, required=True, help='refined vcf file path')
     parser.add_argument('--delete', '-d', type=str, required=False, help='deleted vcf file path')
     args = parser.parse_args()
     input_path = args.input
+    sa_path = args.input
     output_path = args.output
     delete_path = args.delete
     print('\ninput vcf path :', input_path)
@@ -30,26 +32,29 @@ if __name__ == '__main__':
     print('\nlabeling variant type')
     data_csv = labeling_df(vcf_df, column_name)
 
-    # 3. convert to feature dataframe
+    # 3. add alignment information
+    print('\nadding alignment information variant type')
+    align_df = get_alignment_information(sa_path, data_csv)
+
+    # 4. convert to feature dataframe
     print('\nextract feature data\n')
     input_csv = make_learning_data(data_csv, column_name)
-    # input_csv = pd.read_csv('./new/test/learning/aaa1.csv', index_col=0)
 
-    # 3. apply trained model
+    # 5. apply trained model
     print('\nmodel inference step')
     apply_model(input_csv, data_csv, model_dir)
 
     print('\ninference result / "0" refers filtering and "1" refers remaining')
     print(data_csv['result'].value_counts())
 
-    # 4. make remaining/filtering set
+    # 6. make remaining/filtering set
     remaining_set = get_remaining_filtering_set(data_csv)
 
-    # 5. return to vcf
+    # 7. return to vcf
     print('\nsaving result vcf')
     selecting_columns_for_vcf(input_path, output_path, remaining_set, 'refine')
     if delete_path:
         selecting_columns_for_vcf(input_path, delete_path, remaining_set, 'delete')
 
-    # 6. Finish
+    # 8. Finish
     print('\n Done.\n')
